@@ -131,7 +131,7 @@ else:
                     supabase.table("etudiants").update({"role": "moderateur"}).eq("pseudo", st.session_state.pseudo).execute()
                     st.session_state.role = "moderateur"
                     st.rerun()
-                else:
+               else:
                     st.error("Mauvais mot de passe !")
 
     if st.sidebar.button("Se déconnecter", use_container_width=True):
