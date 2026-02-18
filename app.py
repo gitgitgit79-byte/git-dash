@@ -51,7 +51,8 @@ st.markdown("""
     }
     #MainMenu {visibility: hidden;}
     footer {visibility: hidden;}
-    header {visibility: hidden;}
+    [data-testid="stHeader"] {visibility: hidden;}
+button[data-testid="stSidebarCollapseButton"] {visibility: visible !important;}
 </style>
 """, unsafe_allow_html=True)
 
