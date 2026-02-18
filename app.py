@@ -44,12 +44,16 @@ st.markdown("""
 # =====================
 @st.cache_resource
 def init_supabase():
-    url = os.getenv("SUPABASE_URL")
-    key = os.getenv("SUPABASE_KEY")
-    return create_client(url, key)
+    # Utilisation directe de st.secrets pour éviter les problèmes de connexion
+    try:
+        url = st.secrets["SUPABASE_URL"]
+        key = st.secrets["SUPABASE_KEY"]
+        return create_client(url, key)
+    except Exception as e:
+        st.error(f"Erreur de configuration : {e}")
+        st.stop()
 
 supabase = init_supabase()
-
 if "supabase" not in st.session_state:
     st.session_state["supabase"] = supabase
 if "pseudo" not in st.session_state:
