@@ -127,7 +127,7 @@ else:
                     supabase.table("etudiants").update({"role": "delegue"}).eq("pseudo", st.session_state.pseudo).execute()
                     st.session_state.role = "delegue"
                     st.rerun()
-               elif pwd == st.secrets["MODERATEUR_PASSWORD"]::
+               elif pwd == st.secrets["MODERATEUR_PASSWORD"]:
                     supabase.table("etudiants").update({"role": "moderateur"}).eq("pseudo", st.session_state.pseudo).execute()
                     st.session_state.role = "moderateur"
                     st.rerun()
