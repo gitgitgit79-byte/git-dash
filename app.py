@@ -11,27 +11,39 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# =====================
-# HELPER SECRETS
-# =====================
 def get_secret(key):
-    """Fonctionne en local (.env) ET sur Streamlit Cloud (st.secrets)"""
     try:
         return st.secrets[key]
     except:
         return os.getenv(key)
 
-# =====================
-# CSS GLOBAL
-# =====================
 st.markdown("""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
     html, body, [class*="css"] { font-family: 'Inter', sans-serif; }
+
     section[data-testid="stSidebar"] {
         background-color: #F7F7FB;
         border-right: 1px solid #ECECF0;
     }
+
+    #MainMenu { visibility: hidden; }
+    footer { visibility: hidden; }
+
+    /* Bouton sidebar toujours visible */
+    [data-testid="stSidebarCollapseButton"] {
+        visibility: visible !important;
+        opacity: 1 !important;
+        display: flex !important;
+        z-index: 999999 !important;
+    }
+    [data-testid="collapsedControl"] {
+        visibility: visible !important;
+        opacity: 1 !important;
+        display: block !important;
+        z-index: 999999 !important;
+    }
+
     .stButton > button {
         border-radius: 8px; font-weight: 500;
         border: 1px solid #E0E0E8; transition: all 0.2s ease;
@@ -49,27 +61,20 @@ st.markdown("""
         background: #F7F7FB; border-radius: 10px;
         padding: 12px; border: 1px solid #ECECF0;
     }
-    #MainMenu {visibility: hidden;}
-    footer {visibility: hidden;}
-    [data-testid="stHeader"] {visibility: hidden;}
-button[data-testid="stSidebarCollapseButton"] {visibility: visible !important;}
 </style>
 """, unsafe_allow_html=True)
 
-# =====================
-# SUPABASE
-# =====================
 @st.cache_resource
 def init_supabase():
     try:
-        url = st.secrets["SUPABASE_URL"]
-        key = st.secrets["SUPABASE_KEY"]
+        url = get_secret("SUPABASE_URL")
+        key = get_secret("SUPABASE_KEY")
+        if not url or not key:
+            st.error("❌ Clés Supabase manquantes dans les Secrets !")
+            st.stop()
         return create_client(url, key)
-    except KeyError:
-        st.error("❌ SUPABASE_URL ou SUPABASE_KEY manquante dans les Secrets !")
-        st.stop()
     except Exception as e:
-        st.error(f"❌ Erreur : {e}")
+        st.error(f"❌ Erreur Supabase : {e}")
         st.stop()
 
 supabase = init_supabase()
@@ -83,9 +88,6 @@ if "role" not in st.session_state:
 if "etudiant_id" not in st.session_state:
     st.session_state.etudiant_id = None
 
-# =====================
-# SIDEBAR
-# =====================
 st.sidebar.markdown("""
 <div style='text-align:center; padding: 20px 0 10px 0;'>
     <div style='font-size: 40px;'>🎓</div>
@@ -117,7 +119,7 @@ if st.session_state.pseudo is None:
                     st.session_state["supabase"] = supabase
                     st.rerun()
             except Exception as e:
-                st.sidebar.error(f"❌ Erreur de connexion : {e}")
+                st.sidebar.error(f"❌ Erreur : {e}")
 else:
     role_colors = {
         "delegue": "#6C63FF",
@@ -163,9 +165,6 @@ else:
         st.session_state.role = "anonyme"
         st.rerun()
 
-# =====================
-# PAGE PRINCIPALE
-# =====================
 if st.session_state.pseudo is None:
     col1, col2, col3 = st.columns([1, 2, 1])
     with col2:
