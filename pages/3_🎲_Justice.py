@@ -9,7 +9,7 @@ st.markdown("""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
     html, body, [class*="css"] { font-family: 'Inter', sans-serif; }
-    #MainMenu {visibility: hidden;} footer {visibility: hidden;} header {visibility: hidden;}
+    #MainMenu {visibility: hidden;} footer {visibility: hidden;} 
     .stButton > button {
         border-radius: 8px; font-weight: 500;
         border: 1px solid #E0E0E8; transition: all 0.2s ease;
