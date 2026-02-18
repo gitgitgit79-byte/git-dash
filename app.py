@@ -12,48 +12,67 @@ st.set_page_config(
 )
 
 # =====================
+# HELPER SECRETS
+# =====================
+def get_secret(key):
+    """Fonctionne en local (.env) ET sur Streamlit Cloud (st.secrets)"""
+    try:
+        return st.secrets[key]
+    except:
+        return os.getenv(key)
+
+# =====================
 # CSS GLOBAL
 # =====================
 st.markdown("""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
-    
-    html, body, [class*="css"] {
-        font-family: 'Inter', sans-serif;
-    }
-
+    html, body, [class*="css"] { font-family: 'Inter', sans-serif; }
     section[data-testid="stSidebar"] {
         background-color: #F7F7FB;
         border-right: 1px solid #ECECF0;
     }
-
+    .stButton > button {
+        border-radius: 8px; font-weight: 500;
+        border: 1px solid #E0E0E8; transition: all 0.2s ease;
+        background-color: white; color: #1A1A2E;
+    }
+    .stButton > button:hover {
+        background-color: #6C63FF; color: white; border-color: #6C63FF;
+        transform: translateY(-1px); box-shadow: 0 4px 12px rgba(108,99,255,0.2);
+    }
+    [data-testid="stVerticalBlockBorderWrapper"] {
+        border-radius: 12px !important; border: 1px solid #ECECF0 !important;
+        background: white !important; box-shadow: 0 2px 8px rgba(0,0,0,0.04) !important;
+    }
+    [data-testid="stMetric"] {
+        background: #F7F7FB; border-radius: 10px;
+        padding: 12px; border: 1px solid #ECECF0;
+    }
     #MainMenu {visibility: hidden;}
     footer {visibility: hidden;}
-    
-    /* Correction pour la flèche de la sidebar */
-    [data-testid="stSidebarCollapseButton"] {
-        visibility: visible !important;
-        color: #6C63FF !important;
-    }
+    header {visibility: hidden;}
 </style>
 """, unsafe_allow_html=True)
-
 
 # =====================
 # SUPABASE
 # =====================
 @st.cache_resource
 def init_supabase():
-    # Utilisation directe de st.secrets pour éviter les problèmes de connexion
     try:
-        url = st.secrets["SUPABASE_URL"]
-        key = st.secrets["SUPABASE_KEY"]
+        url = get_secret("SUPABASE_URL")
+        key = get_secret("SUPABASE_KEY")
+        if not url or not key:
+            st.error("❌ Clés Supabase manquantes ! Vérifie les Secrets sur Streamlit Cloud.")
+            st.stop()
         return create_client(url, key)
     except Exception as e:
-        st.error(f"Erreur de configuration : {e}")
+        st.error(f"❌ Erreur de connexion Supabase : {e}")
         st.stop()
 
 supabase = init_supabase()
+
 if "supabase" not in st.session_state:
     st.session_state["supabase"] = supabase
 if "pseudo" not in st.session_state:
@@ -84,17 +103,20 @@ if st.session_state.pseudo is None:
         if pseudo.strip() == "":
             st.sidebar.error("Entre un pseudo !")
         else:
-            res = supabase.table("etudiants").select("*").eq("pseudo", pseudo).execute()
-            if len(res.data) == 0:
-                st.sidebar.error("❌ Pseudo introuvable. Contacte le délégué.")
-            elif not res.data[0].get("autorise", False):
-                st.sidebar.error("❌ Compte pas encore activé.")
-            else:
-                st.session_state.pseudo = pseudo
-                st.session_state.role = res.data[0]["role"]
-                st.session_state.etudiant_id = res.data[0]["id"]
-                st.session_state["supabase"] = supabase
-                st.rerun()
+            try:
+                res = supabase.table("etudiants").select("*").eq("pseudo", pseudo).execute()
+                if len(res.data) == 0:
+                    st.sidebar.error("❌ Pseudo introuvable. Contacte le délégué.")
+                elif not res.data[0].get("autorise", False):
+                    st.sidebar.error("❌ Compte pas encore activé.")
+                else:
+                    st.session_state.pseudo = pseudo
+                    st.session_state.role = res.data[0]["role"]
+                    st.session_state.etudiant_id = res.data[0]["id"]
+                    st.session_state["supabase"] = supabase
+                    st.rerun()
+            except Exception as e:
+                st.sidebar.error(f"❌ Erreur de connexion : {e}")
 else:
     role_colors = {
         "delegue": "#6C63FF",
@@ -123,15 +145,15 @@ else:
         with st.sidebar.expander("🔐 Accès Admin"):
             pwd = st.text_input("Mot de passe", type="password", key="pwd_input")
             if st.button("Valider", key="btn_pwd", use_container_width=True):
-               if pwd == st.secrets["DELEGUE_PASSWORD"]:
+                if pwd == get_secret("DELEGUE_PASSWORD"):
                     supabase.table("etudiants").update({"role": "delegue"}).eq("pseudo", st.session_state.pseudo).execute()
                     st.session_state.role = "delegue"
                     st.rerun()
-               elif pwd == st.secrets["MODERATEUR_PASSWORD"]:
+                elif pwd == get_secret("MODERATEUR_PASSWORD"):
                     supabase.table("etudiants").update({"role": "moderateur"}).eq("pseudo", st.session_state.pseudo).execute()
                     st.session_state.role = "moderateur"
                     st.rerun()
-               else:
+                else:
                     st.error("Mauvais mot de passe !")
 
     if st.sidebar.button("Se déconnecter", use_container_width=True):
