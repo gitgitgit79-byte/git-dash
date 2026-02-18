@@ -61,14 +61,14 @@ st.markdown("""
 @st.cache_resource
 def init_supabase():
     try:
-        url = get_secret("SUPABASE_URL")
-        key = get_secret("SUPABASE_KEY")
-        if not url or not key:
-            st.error("❌ Clés Supabase manquantes ! Vérifie les Secrets sur Streamlit Cloud.")
-            st.stop()
+        url = st.secrets["SUPABASE_URL"]
+        key = st.secrets["SUPABASE_KEY"]
         return create_client(url, key)
+    except KeyError:
+        st.error("❌ SUPABASE_URL ou SUPABASE_KEY manquante dans les Secrets !")
+        st.stop()
     except Exception as e:
-        st.error(f"❌ Erreur de connexion Supabase : {e}")
+        st.error(f"❌ Erreur : {e}")
         st.stop()
 
 supabase = init_supabase()
