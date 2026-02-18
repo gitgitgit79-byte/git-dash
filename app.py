@@ -123,11 +123,11 @@ else:
         with st.sidebar.expander("🔐 Accès Admin"):
             pwd = st.text_input("Mot de passe", type="password", key="pwd_input")
             if st.button("Valider", key="btn_pwd", use_container_width=True):
-                if pwd == os.getenv("DELEGUE_PASSWORD"):
+               if pwd == st.secrets["DELEGUE_PASSWORD"]:
                     supabase.table("etudiants").update({"role": "delegue"}).eq("pseudo", st.session_state.pseudo).execute()
                     st.session_state.role = "delegue"
                     st.rerun()
-                elif pwd == os.getenv("MODERATEUR_PASSWORD"):
+               elif pwd == st.secrets["MODERATEUR_PASSWORD"]::
                     supabase.table("etudiants").update({"role": "moderateur"}).eq("pseudo", st.session_state.pseudo).execute()
                     st.session_state.role = "moderateur"
                     st.rerun()
