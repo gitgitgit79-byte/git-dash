@@ -14,7 +14,6 @@ st.set_page_config(
 # =====================
 # CSS GLOBAL
 # =====================
-st.markdown("""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
     
@@ -27,6 +26,7 @@ st.markdown("""
         border-right: 1px solid #ECECF0;
     }
 
+    /* Style des boutons */
     .stButton > button {
         border-radius: 8px;
         font-weight: 500;
@@ -44,6 +44,7 @@ st.markdown("""
         box-shadow: 0 4px 12px rgba(108, 99, 255, 0.2);
     }
 
+    /* Cartes et blocs */
     [data-testid="stVerticalBlockBorderWrapper"] {
         border-radius: 12px !important;
         border: 1px solid #ECECF0 !important;
@@ -51,21 +52,14 @@ st.markdown("""
         box-shadow: 0 2px 8px rgba(0,0,0,0.04) !important;
     }
 
+    /* Inputs */
     .stTextInput > div > div > input {
         border-radius: 8px;
         border: 1px solid #E0E0E8;
         padding: 10px 14px;
     }
 
-    .stTextInput > div > div > input:focus {
-        border-color: #6C63FF;
-        box-shadow: 0 0 0 3px rgba(108, 99, 255, 0.1);
-    }
-
-    h1 { font-weight: 700; color: #1A1A2E; letter-spacing: -0.5px; }
-    h2 { font-weight: 600; color: #1A1A2E; }
-    h3 { font-weight: 600; color: #1A1A2E; }
-
+    /* Metrics */
     [data-testid="stMetric"] {
         background: #F7F7FB;
         border-radius: 10px;
@@ -73,9 +67,25 @@ st.markdown("""
         border: 1px solid #ECECF0;
     }
 
+    /* --- FIX POUR LA BARRE LATÉRALE --- */
+    
+    /* On cache le menu Streamlit et le footer mais PAS le header entier */
     #MainMenu {visibility: hidden;}
     footer {visibility: hidden;}
-    header {visibility: hidden;}
+    
+    /* On s'assure que le bouton de la sidebar est visible et coloré */
+    [data-testid="stSidebarCollapseButton"] {
+        visibility: visible !important;
+        color: #6C63FF !important;
+        background-color: rgba(108, 99, 255, 0.1) !important;
+        border-radius: 50% !important;
+    }
+
+    /* Correction pour mobile : rendre la flèche de déploiement très visible */
+    button[kind="headerNoPadding"] {
+        visibility: visible !important;
+        color: #6C63FF !important;
+    }
 </style>
 """, unsafe_allow_html=True)
 
